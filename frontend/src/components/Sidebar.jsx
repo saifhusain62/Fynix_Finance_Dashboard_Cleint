@@ -10,7 +10,7 @@ import { FaChartLine, FaMoneyBillWave, FaBolt } from "react-icons/fa";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { BiTransfer } from "react-icons/bi";
 import { IoChevronBack } from "react-icons/io5";
-import logo from "../assets/logo.png";
+import logo from "../assets/svg.svg";
 
 const menuItems = [
   { name: "Overview", icon: <MdGridView size={20} />, path: "/" },
@@ -32,10 +32,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       style={{ backgroundColor: "#1C1C1C", borderRight: "1px solid #F4720133" }}
     >
       {/* ✅ Logo Section */}
-      <div className="relative flex items-center justify-center py-6 px-4">
+      <div className="relative flex items-center py-6 px-4">
         {collapsed ? (
           // ✅ Collapsed - Show Small Logo Only
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center w-full">
             <img
               src={logo}
               alt="Logo"
@@ -47,19 +47,32 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             />
           </div>
         ) : (
-          // ✅ Expanded - Show Big Logo Properly
-          <div className="flex flex-col items-center gap-3 w-full">
+          // ✅ Expanded - Show Logo + Fynix Text
+          <div className="flex items-center gap-3 pl-1">
             <img
               src={logo}
               alt="Logo"
               style={{
-                width: "120px",        // ✅ Big enough to see clearly
-                height: "120px",
-                objectFit: "contain",  // ✅ No stretch or crop
-                display: "block",
+                width: "42px",
+                height: "42px",
+                objectFit: "contain",
+                flexShrink: 0,
               }}
             />
-            
+            <span
+              style={{
+                fontSize: "22px",
+                fontWeight: "700",
+                letterSpacing: "0.5px",
+                background: "linear-gradient(135deg, #FF7A1A, #FFB347)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                userSelect: "none",
+              }}
+            >
+              Fynix
+            </span>
           </div>
         )}
 
@@ -80,12 +93,6 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           />
         </button>
       </div>
-
-      {/* ✅ Divider Line */}
-      {/* <div
-        className="mx-4 mb-2"
-        style={{ borderTop: "1px solid #2A2A2A" }}
-      /> */}
 
       {/* ✅ Navigation Menu */}
       <nav className="flex-1 px-3 mt-2 space-y-1 overflow-y-auto">
