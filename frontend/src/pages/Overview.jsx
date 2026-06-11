@@ -25,10 +25,19 @@ const expenses = [
   { name: "New PC", percent: 10 },
 ];
 
-const avatars = [12, 32, 45, 22, 33, 5, 8];
+// Added "active" flag - one avatar will have the orange ring
+const avatars = [
+  { id: 12, active: false },
+  { id: 32, active: false },
+  { id: 45, active: true },
+  { id: 22, active: false },
+  { id: 33, active: false },
+  { id: 5, active: false },
+  { id: 8, active: false },
+];
 
 const cardStyle = { backgroundColor: "#2A2A2A" };
-const innerCardStyle = { backgroundColor: "#1C1C1C" };
+const innerCardStyle = { backgroundColor: "#454545" };
 
 export default function Overview() {
   return (
@@ -47,8 +56,8 @@ export default function Overview() {
             style={cardStyle}
           >
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center mr-2"
-              style={{ backgroundColor: "#FF7A1A" }}
+              className="w-10 h-8 rounded-full flex items-center justify-center mr-2 text-orange-500"
+              style={{ backgroundColor: "#2A2A2A" }}
             >
               <FiSearch />
             </div>
@@ -169,13 +178,18 @@ export default function Overview() {
             <p className="text-gray-400 text-xs mb-3">
               View your income in a certain period of time
             </p>
-            <div className="flex -space-x-2 mb-4">
-              {avatars.map((id, i) => (
+            {/* Updated avatar row - with gaps and active ring */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {avatars.map((av, i) => (
                 <img
                   key={i}
-                  src={`https://i.pravatar.cc/40?img=${id}`}
-                  className="w-9 h-9 rounded-full"
-                  style={{ border: "2px solid #2A2A2A" }}
+                  src={`https://i.pravatar.cc/40?img=${av.id}`}
+                  className="w-9 h-9 rounded-full object-cover"
+                  style={{
+                    border: av.active ? "2px solid #FF7A1A" : "2px solid transparent",
+                    padding: av.active ? "1px" : "0",
+                    boxSizing: "border-box",
+                  }}
                   alt=""
                 />
               ))}
@@ -299,39 +313,53 @@ export default function Overview() {
                 </button>
               </div>
             </div>
+
+            {/* Updated Table - matches your image layout */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="text-gray-400 text-xs">
-                  <tr style={{ borderBottom: "1px solid #3a3a3a" }}>
-                    <th className="py-3 font-normal">Name</th>
-                    <th className="py-3 font-normal">Date & Time</th>
-                    <th className="py-3 font-normal">Invoice ID</th>
-                    <th className="py-3 font-normal">fee</th>
-                    <th className="py-3 font-normal">Balance</th>
-                    <th className="py-3 font-normal">Status</th>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr
+                    className="text-gray-400 text-xs"
+                    style={{ borderBottom: "1px solid #3a3a3a" }}
+                  >
+                    <th className="py-3 px-2 font-normal w-[15%]">Name</th>
+                    <th className="py-3 px-2 font-normal w-[20%]">Date & Time</th>
+                    <th className="py-3 px-2 font-normal w-[15%]">Invoice ID</th>
+                    <th className="py-3 px-2 font-normal w-[10%]">fee</th>
+                    <th className="py-3 px-2 font-normal w-[15%]">Balance</th>
+                    <th className="py-3 px-2 font-normal w-[15%]">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentActivity.map((r, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #333" }} className="text-sm">
-                      <td className="py-4">{r.name}</td>
-                      <td className="py-4">
-                        {r.date} <br />
-                        <span className="text-gray-500 text-xs">{r.time}</span>
+                    <tr
+                      key={i}
+                      className="text-sm"
+                      style={{ borderBottom: "1px solid #333" }}
+                    >
+                      <td className="py-4 px-2 align-middle">{r.name}</td>
+                      <td className="py-4 px-2 align-middle">
+                        <div>{r.date}</div>
+                        <div className="text-gray-500 text-xs mt-1">
+                          {r.time}
+                        </div>
                       </td>
-                      <td className="py-4">{r.id}</td>
-                      <td className="py-4">{r.fee}</td>
-                      <td className="py-4">{r.balance}</td>
-                      <td className="py-4">
+                      <td className="py-4 px-2 align-middle">{r.id}</td>
+                      <td className="py-4 px-2 align-middle">{r.fee}</td>
+                      <td className="py-4 px-2 align-middle">{r.balance}</td>
+                      <td className="py-4 px-2 align-middle">
                         <span
-                          className="px-3 py-1 rounded-md text-xs font-medium"
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium"
                           style={{
                             backgroundColor:
                               r.status === "Success" ? "#22C55E" : "#EF4444",
                             color: "white",
                           }}
                         >
-                          • {r.status}
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-white inline-block"
+                          ></span>
+                          {r.status}
                         </span>
                       </td>
                     </tr>

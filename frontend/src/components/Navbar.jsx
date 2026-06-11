@@ -16,17 +16,26 @@ export default function Navbar() {
       >
         <button
           onClick={() => setDark(true)}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: dark ? "#444" : "transparent" }}
+          className="p-2 rounded-full transition-all duration-200"
+          style={{
+            backgroundColor: dark ? "#F47201" : "transparent",
+          }}
         >
-          <FiMoon className="text-white" />
+          <FiMoon
+            style={{ color: dark ? "#ffffff" : "#888888" }}
+          />
         </button>
+
         <button
           onClick={() => setDark(false)}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: !dark ? "#444" : "transparent" }}
+          className="p-2 rounded-full transition-all duration-200"
+          style={{
+            backgroundColor: !dark ? "#ffffff" : "transparent",
+          }}
         >
-          <FiSun className="text-white" />
+          <FiSun
+            style={{ color: !dark ? "#F47201" : "#888888" }}
+          />
         </button>
       </div>
 
