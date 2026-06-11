@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Overview from "./pages/Overview";
+import Transactions from "./pages/Transactions";
 
 export default function App() {
   const [collapsed, setCollapsed] = useState(false);
@@ -15,13 +16,13 @@ export default function App() {
         <div className="flex-1 overflow-auto">
           <Routes>
             <Route path="/" element={<Overview />} />
-            <Route path="/card" element={<div className="p-8 text-2xl">Card Page</div>} />
-            <Route path="/investment" element={<div className="p-8 text-2xl">Investment Page</div>} />
-            <Route path="/transactions" element={<div className="p-8 text-2xl">Transactions Page</div>} />
-            <Route path="/savings" element={<div className="p-8 text-2xl">Savings Page</div>} />
-            <Route path="/activity" element={<div className="p-8 text-2xl">Activity Page</div>} />
-            <Route path="/reports" element={<div className="p-8 text-2xl">Reports Page</div>} />
-            <Route path="/settings" element={<div className="p-8 text-2xl">Settings Page</div>} />
+            <Route path="/card" element={<div className="p-8 text-2xl">Coming Soon</div>} />
+            <Route path="/investment" element={<div className="p-8 text-2xl">Coming Soon</div>} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/savings" element={<div className="p-8 text-2xl">Coming Soon</div>} />
+            <Route path="/activity" element={<div className="p-8 text-2xl">Coming Soon</div>} />
+            <Route path="/reports" element={<div className="p-8 text-2xl">Coming Soon</div>} />
+            <Route path="/settings" element={<div className="p-8 text-2xl">Coming Soon</div>} />
           </Routes>
         </div>
       </div>
