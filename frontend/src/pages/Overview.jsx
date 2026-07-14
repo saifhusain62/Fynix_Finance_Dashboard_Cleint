@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FiSearch,
   FiTrendingUp,
@@ -6,46 +6,103 @@ import {
   FiCalendar,
   FiSliders,
   FiChevronDown,
+  FiX,
 } from "react-icons/fi";
 import { FaArrowDown } from "react-icons/fa";
 import { MdAccountBalanceWallet, MdAttachMoney } from "react-icons/md";
 import { BsCreditCard2Front } from "react-icons/bs";
+import { useFinance } from "../context/FinanceContext";
+import { Link } from "react-router-dom";
 
-const recentActivity = [
-  { name: "Kabir", date: "02 Jan 2026", time: "at 08.25 am", id: "agfs55198", fee: "$0.00", balance: "+$650.00", status: "Success" },
-  { name: "Ben", date: "05 Jan 2026", time: "at 10.25 am", id: "Tvtg55184", fee: "$0.00", balance: "+$850.00", status: "Success" },
-  { name: "Mark", date: "25 Jan 2026", time: "at 11.25 am", id: "sfbh5515", fee: "$0.00", balance: "+$750.00", status: "Pending" },
-  { name: "Khan", date: "30 Jan 2026", time: "at 12.25 pm", id: "sfbf55114", fee: "$0.00", balance: "+$350.00", status: "Success" },
-];
-
-const expenses = [
-  { name: "New Car", percent: 45 },
-  { name: "New House Rent", percent: 25 },
-  { name: "New Phone", percent: 60 },
-  { name: "New PC", percent: 10 },
-];
-
-// Added "active" flag - one avatar will have the orange ring
+// Pre-defined avatars list for Quick Transfer
 const avatars = [
-  { id: 12, active: false },
-  { id: 32, active: false },
-  { id: 45, active: true },
-  { id: 22, active: false },
-  { id: 33, active: false },
-  { id: 5, active: false },
-  { id: 8, active: false },
+  { id: 12, name: "Kabir" },
+  { id: 32, name: "Ben" },
+  { id: 45, name: "Mark" },
+  { id: 22, name: "Sarah" },
+  { id: 33, name: "Jessica" },
+  { id: 5, name: "David" },
+  { id: 8, name: "Emma" },
 ];
 
-const cardStyle = { backgroundColor: "#2A2A2A" };
-const innerCardStyle = { backgroundColor: "#454545" };
+const cardStyle = { backgroundColor: "var(--card-bg)" };
+const innerCardStyle = { backgroundColor: "var(--card-inner)" };
 
 export default function Overview() {
+  const {
+    user,
+    balances,
+    transactions,
+    cards,
+    savingsGoals,
+    deposit,
+    withdraw,
+    transferFunds,
+  } = useFinance();
+
+  // Modals state
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [transactionAmount, setTransactionAmount] = useState("");
+  const [selectedCardAccount, setSelectedCardAccount] = useState(cards[0]?.name || "Cash Wallet");
+
+  // Quick Transfer state
+  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(2); // Default to Mark
+  const [quickTransferAmount, setQuickTransferAmount] = useState("2662.05");
+
+  // Search filter
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleDepositSubmit = (e) => {
+    e.preventDefault();
+    const amt = Number(transactionAmount);
+    if (amt <= 0) {
+      alert("Amount must be positive!");
+      return;
+    }
+    deposit(amt, selectedCardAccount);
+    setTransactionAmount("");
+    setShowDepositModal(false);
+  };
+
+  const handleWithdrawSubmit = (e) => {
+    e.preventDefault();
+    const amt = Number(transactionAmount);
+    if (amt <= 0) {
+      alert("Amount must be positive!");
+      return;
+    }
+    const ok = withdraw(amt, selectedCardAccount);
+    if (ok) {
+      setTransactionAmount("");
+      setShowWithdrawModal(false);
+    }
+  };
+
+  const handleQuickTransferSubmit = () => {
+    const amt = Number(quickTransferAmount);
+    if (amt <= 0) {
+      alert("Amount must be positive!");
+      return;
+    }
+    const recipient = avatars[selectedAvatarIndex]?.name || "Recipient";
+    const ok = transferFunds(recipient, amt, cards[0]?.name);
+    if (ok) {
+      alert(`Successfully sent $${amt.toLocaleString()} to ${recipient}!`);
+    }
+  };
+
+  // Filter transactions for overview list search
+  const filteredTransactions = transactions.filter((t) =>
+    t.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="p-6 min-h-screen" style={{ backgroundColor: "#1C1C1C", color: "white" }}>
+    <div className="p-6 min-h-screen" style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}>
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Good Morning Kabir!</h1>
+          <h1 className="text-3xl font-bold">Good Morning {user.name}!</h1>
           <p className="text-gray-400 mt-1 text-sm">
             Smart Task Tracking To Keep Your Workflow Moving Smoothly
           </p>
@@ -64,20 +121,29 @@ export default function Overview() {
             <input
               type="text"
               placeholder="Search Here.."
-              className="bg-transparent outline-none w-full text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent outline-none w-full text-sm placeholder-gray-500 text-white"
             />
           </div>
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm"
+            onClick={() => {
+              setTransactionAmount("");
+              setShowWithdrawModal(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
             style={{ backgroundColor: "#FF7A1A" }}
           >
             <FaArrowDown /> Withdraw
           </button>
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm"
-            style={{ backgroundColor: "#2A2A2A", border: "1px solid #FF7A1A" }}
+            onClick={() => {
+              setTransactionAmount("");
+              setShowDepositModal(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all border border-orange-500 hover:scale-105 active:scale-95 cursor-pointer text-orange-500 bg-transparent"
           >
-            <FiPlus style={{ color: "#FF7A1A" }} /> Deposit
+            <FiPlus /> Deposit
           </button>
         </div>
       </div>
@@ -98,7 +164,7 @@ export default function Overview() {
               <span className="text-gray-200 font-medium">Total Revenue</span>
             </div>
             <h2 className="text-4xl font-bold" style={{ color: "#FF7A1A" }}>
-              $25,562.05
+              ${balances.revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </h2>
             <div className="flex justify-between items-center mt-8 text-xs text-gray-400">
               <span>Compare to last month</span>
@@ -110,19 +176,24 @@ export default function Overview() {
 
           {/* Daily Transactions */}
           <div className="rounded-2xl p-4" style={cardStyle}>
-            <h3 className="font-semibold mb-6">Daily Transections limit</h3>
-            <div className="flex justify-end text-xs mb-1">75%</div>
+            <h3 className="font-semibold mb-6">Daily Transactions limit</h3>
+            <div className="flex justify-end text-xs mb-1">
+              {((balances.limitUsed / balances.limitMax) * 100).toFixed(0)}%
+            </div>
             <div
               className="w-full h-2 rounded-full overflow-hidden"
               style={innerCardStyle}
             >
               <div
-                className="h-full rounded-full"
-                style={{ width: "75%", backgroundColor: "#FF7A1A" }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${(balances.limitUsed / balances.limitMax) * 100}%`,
+                  backgroundColor: "#FF7A1A",
+                }}
               />
             </div>
             <p className="text-gray-400 text-xs mt-3">
-              $2350 Used From $3,050 Limit
+              ${balances.limitUsed} Used From ${balances.limitMax} Limit
             </p>
           </div>
         </div>
@@ -133,19 +204,19 @@ export default function Overview() {
           <div className="rounded-2xl p-6" style={cardStyle}>
             <div className="flex justify-between items-center mb-1">
               <h3 className="text-lg font-semibold">All Track In One</h3>
-              <button className="text-sm" style={{ color: "#FF7A1A" }}>
+              <Link to="/reports" className="text-sm" style={{ color: "#FF7A1A" }}>
                 View All
-              </button>
+              </Link>
             </div>
             <p className="text-gray-400 text-xs mb-4">
               View your income in a certain period of time
             </p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Current Balance", value: "$75,662.05", percent: "+56.85%" },
-                { label: "Income", value: "$25,662.05", percent: "+56.85%" },
-                { label: "Savings", value: "$15,662.05", percent: "+16.85%" },
-                { label: "Expenses", value: "$5,662.05", percent: "+16.85%" },
+                { label: "Current Balance", value: `$${balances.balance.toLocaleString()}`, percent: "+56.85%" },
+                { label: "Income", value: `$${balances.income.toLocaleString()}`, percent: "+56.85%" },
+                { label: "Savings", value: `$${balances.savings.toLocaleString()}`, percent: "+16.85%" },
+                { label: "Expenses", value: `$${balances.expenses.toLocaleString()}`, percent: "+16.85%" },
               ].map((item, i) => (
                 <div key={i} className="rounded-xl p-4" style={innerCardStyle}>
                   <div className="flex items-center gap-2 text-xs text-gray-300">
@@ -176,34 +247,44 @@ export default function Overview() {
           <div className="rounded-2xl p-6" style={cardStyle}>
             <h3 className="font-semibold mb-1">Quick Transfer</h3>
             <p className="text-gray-400 text-xs mb-3">
-              View your income in a certain period of time
+              Instantly move funds to active contacts
             </p>
-            {/* Updated avatar row - with gaps and active ring */}
+            {/* Avatar row with active ring based on index */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
               {avatars.map((av, i) => (
-                <img
+                <button
                   key={i}
-                  src={`https://i.pravatar.cc/40?img=${av.id}`}
-                  className="w-9 h-9 rounded-full object-cover"
-                  style={{
-                    border: av.active ? "2px solid #FF7A1A" : "2px solid transparent",
-                    padding: av.active ? "1px" : "0",
-                    boxSizing: "border-box",
-                  }}
-                  alt=""
-                />
+                  onClick={() => setSelectedAvatarIndex(i)}
+                  className="relative focus:outline-none transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                  title={av.name}
+                >
+                  <img
+                    src={`https://i.pravatar.cc/40?img=${av.id}`}
+                    className="w-9 h-9 rounded-full object-cover"
+                    style={{
+                      border: selectedAvatarIndex === i ? "2px solid #FF7A1A" : "2px solid transparent",
+                      padding: selectedAvatarIndex === i ? "1px" : "0",
+                      boxSizing: "border-box",
+                    }}
+                    alt={av.name}
+                  />
+                </button>
               ))}
             </div>
             <p className="text-xs text-gray-400">
               Balance :{" "}
-              <span className="text-white font-semibold">$75,662.05</span>
+              <span className="text-white font-semibold">${balances.balance.toLocaleString()}</span>
             </p>
             <div className="flex justify-between items-center mt-3">
-              <h2 className="text-2xl font-bold" style={{ color: "#FF7A1A" }}>
-                $2,662.05
-              </h2>
+              <input
+                type="text"
+                value={quickTransferAmount}
+                onChange={(e) => setQuickTransferAmount(e.target.value)}
+                className="text-2xl font-bold bg-transparent outline-none w-28 text-orange-500"
+              />
               <button
-                className="px-5 py-2 rounded-lg font-medium text-sm"
+                onClick={handleQuickTransferSubmit}
+                className="px-5 py-2 rounded-lg font-medium text-sm text-white hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                 style={{ backgroundColor: "#FF7A1A" }}
               >
                 Send
@@ -215,106 +296,96 @@ export default function Overview() {
           <div className="rounded-2xl p-6" style={cardStyle}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold">Your Cards</h3>
-              <button className="text-sm" style={{ color: "#FF7A1A" }}>
+              <Link to="/card" className="text-sm" style={{ color: "#FF7A1A" }}>
                 View All
-              </button>
+              </Link>
             </div>
-            <div
-              className="rounded-2xl p-5 text-white relative overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, #FF9A4D, #EA580C)",
-                minHeight: "150px",
-              }}
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-sm">
-                  <BsCreditCard2Front size={18} />
-                  <span>Credit Card</span>
+            {cards.length > 0 ? (
+              <div
+                className="rounded-2xl p-5 text-white relative overflow-hidden"
+                style={{
+                  background: cards[0].color,
+                  minHeight: "150px",
+                }}
+              >
+                {cards[0].isLocked && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1 z-10">
+                    <span className="text-[10px] uppercase font-bold text-red-300">Frozen</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2 text-sm">
+                    <BsCreditCard2Front size={18} />
+                    <span>{cards[0].name}</span>
+                  </div>
+                  <span className="font-bold italic text-xl">{cards[0].type}</span>
                 </div>
-                <span className="font-bold italic text-xl">VISA</span>
+                <div className="flex gap-3 mt-12 text-base tracking-widest font-medium">
+                  {cards[0].number.slice(0, 4)} **** **** {cards[0].number.slice(-4)}
+                </div>
               </div>
-              <div className="flex gap-3 mt-12 text-base tracking-widest font-medium">
-                <span>1234</span>
-                <span>5678</span>
-                <span>9101</span>
-                <span>1121</span>
-              </div>
-            </div>
+            ) : (
+              <div className="text-xs text-gray-500 text-center py-6">No credit cards available.</div>
+            )}
           </div>
 
-          {/* Your Expenses */}
+          {/* Your Expenses Progress */}
           <div className="rounded-2xl p-6" style={cardStyle}>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Your Expenses</h3>
-              <button className="text-sm" style={{ color: "#FF7A1A" }}>
+              <h3 className="font-semibold">Your Savings Goals</h3>
+              <Link to="/savings" className="text-sm" style={{ color: "#FF7A1A" }}>
                 View All
-              </button>
+              </Link>
             </div>
             <div className="space-y-3">
-              {expenses.map((e, i) => (
-                <div key={i}>
-                  <div className="flex justify-between text-xs">
-                    <span>{e.name}</span>
-                    <span>{e.percent}%</span>
-                  </div>
-                  <div
-                    className="w-full h-2 rounded-full overflow-hidden mt-2"
-                    style={innerCardStyle}
-                  >
+              {savingsGoals.slice(0, 4).map((goal, i) => {
+                const percent = goal.target > 0 ? (goal.saved / goal.target) * 100 : 0;
+                return (
+                  <div key={i}>
+                    <div className="flex justify-between text-xs">
+                      <span>{goal.name}</span>
+                      <span>{percent.toFixed(0)}%</span>
+                    </div>
                     <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${e.percent}%`,
-                        backgroundColor: "#FF7A1A",
-                      }}
-                    />
+                      className="w-full h-2 rounded-full overflow-hidden mt-2"
+                      style={innerCardStyle}
+                    >
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${Math.min(100, percent)}%`,
+                          backgroundColor: goal.color,
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* RECENT ACTIVITY - spans left + middle = 9 columns */}
+        {/* RECENT ACTIVITY */}
         <div className="col-span-12 lg:col-span-9">
           <div className="rounded-2xl p-6" style={cardStyle}>
             <div className="flex flex-wrap justify-between items-center mb-5 gap-3">
               <div>
                 <h3 className="font-semibold text-lg">Recent Activity</h3>
                 <p className="text-gray-400 text-xs">
-                  View your income in a certain period of time
+                  View recent account actions and transaction history
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  className="flex items-center gap-2 px-3 py-2 rounded-full text-xs"
-                  style={innerCardStyle}
+                <Link
+                  to="/transactions"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-white bg-orange-500"
                 >
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "#FF7A1A" }}
-                  >
-                    <FiCalendar size={12} />
-                  </div>
-                  Jan 2026 - Feb 2026
-                  <FiChevronDown />
-                </button>
-                <button
-                  className="w-9 h-9 rounded-lg flex items-center justify-center"
-                  style={innerCardStyle}
-                >
-                  <FiSliders />
-                </button>
-                <button
-                  className="w-9 h-9 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "#FF7A1A" }}
-                >
-                  <FiPlus />
-                </button>
+                  Manage Transactions
+                </Link>
               </div>
             </div>
 
-            {/* Updated Table - matches your image layout */}
+            {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -322,16 +393,15 @@ export default function Overview() {
                     className="text-gray-400 text-xs"
                     style={{ borderBottom: "1px solid #3a3a3a" }}
                   >
-                    <th className="py-3 px-2 font-normal w-[15%]">Name</th>
-                    <th className="py-3 px-2 font-normal w-[20%]">Date & Time</th>
-                    <th className="py-3 px-2 font-normal w-[15%]">Invoice ID</th>
-                    <th className="py-3 px-2 font-normal w-[10%]">fee</th>
-                    <th className="py-3 px-2 font-normal w-[15%]">Balance</th>
-                    <th className="py-3 px-2 font-normal w-[15%]">Status</th>
+                    <th className="py-3 px-2 font-normal w-[20%]">Name</th>
+                    <th className="py-3 px-2 font-normal w-[25%]">Date & Time</th>
+                    <th className="py-3 px-2 font-normal w-[20%]">Invoice ID</th>
+                    <th className="py-3 px-2 font-normal w-[15%]">Fee</th>
+                    <th className="py-3 px-2 font-normal w-[20%]">Balance Change</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentActivity.map((r, i) => (
+                  {filteredTransactions.slice(0, 4).map((r, i) => (
                     <tr
                       key={i}
                       className="text-sm"
@@ -344,32 +414,139 @@ export default function Overview() {
                           {r.time}
                         </div>
                       </td>
-                      <td className="py-4 px-2 align-middle">{r.id}</td>
-                      <td className="py-4 px-2 align-middle">{r.fee}</td>
-                      <td className="py-4 px-2 align-middle">{r.balance}</td>
-                      <td className="py-4 px-2 align-middle">
-                        <span
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium"
-                          style={{
-                            backgroundColor:
-                              r.status === "Success" ? "#22C55E" : "#EF4444",
-                            color: "white",
-                          }}
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full bg-white inline-block"
-                          ></span>
-                          {r.status}
-                        </span>
+                      <td className="py-4 px-2 align-middle font-mono">{r.id}</td>
+                      <td className="py-4 px-2 align-middle">$0.00</td>
+                      <td
+                        className="py-4 px-2 align-middle font-semibold"
+                        style={{ color: r.isPositive ? "#FFFFFF" : "#EF4444" }}
+                      >
+                        {r.amount}
                       </td>
                     </tr>
                   ))}
+                  {filteredTransactions.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-gray-500">
+                        No transactions found.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Deposit Overlay Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-2xl p-6 relative bg-[#2A2A2A]">
+            <button
+              onClick={() => setShowDepositModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <FiX size={20} />
+            </button>
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+              <FiPlus className="text-orange-500" /> Deposit Funds
+            </h3>
+            <form onSubmit={handleDepositSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Deposit Amount ($)</label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={transactionAmount}
+                  onChange={(e) => setTransactionAmount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  placeholder="e.g. 500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Select Destination Account</label>
+                <select
+                  value={selectedCardAccount}
+                  onChange={(e) => setSelectedCardAccount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                >
+                  <option value="Cash Wallet">Cash Wallet</option>
+                  {cards.map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-2.5 rounded-xl font-bold text-xs text-white hover:opacity-90 active:scale-95 transition-all"
+                  style={{ backgroundColor: "#FF7A1A" }}
+                >
+                  Confirm Deposit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Overlay Modal */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-2xl p-6 relative bg-[#2A2A2A]">
+            <button
+              onClick={() => setShowWithdrawModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <FiX size={20} />
+            </button>
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+              <FaArrowDown className="text-orange-500" /> Withdraw Funds
+            </h3>
+            <form onSubmit={handleWithdrawSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Withdrawal Amount ($)</label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={transactionAmount}
+                  onChange={(e) => setTransactionAmount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  placeholder="e.g. 200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Select Source Account</label>
+                <select
+                  value={selectedCardAccount}
+                  onChange={(e) => setSelectedCardAccount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                >
+                  <option value="Cash Wallet">Cash Wallet</option>
+                  {cards.map(c => (
+                    <option key={c.id} value={c.name} disabled={c.isLocked}>{c.name} {c.isLocked ? "(Locked)" : ""}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-2.5 rounded-xl font-bold text-xs text-white hover:opacity-90 active:scale-95 transition-all"
+                  style={{ backgroundColor: "#FF7A1A" }}
+                >
+                  Confirm Withdrawal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

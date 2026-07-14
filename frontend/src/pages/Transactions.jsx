@@ -9,60 +9,14 @@ import {
   FiCreditCard,
   FiArrowUpRight,
   FiArrowDownLeft,
+  FiX,
 } from "react-icons/fi";
 import { FaArrowDown } from "react-icons/fa";
 import { MdAccountBalanceWallet, MdMoreVert } from "react-icons/md";
-import { BsCreditCard2Front } from "react-icons/bs";
+import { useFinance } from "../context/FinanceContext";
 
-const cardStyle = { backgroundColor: "#2A2A2A" };
-const innerCardStyle = { backgroundColor: "#454545" };
-
-const initialTransactions = [
-  {
-    name: "Bonus Payment",
-    category: "income",
-    account: "Platinum Visa Card",
-    id: "456113216865",
-    date: "02 Jan 2026",
-    time: "at 08.25 am",
-    amount: "+$650.00",
-    isPositive: true,
-    status: "Success",
-  },
-  {
-    name: "Stock Dividends",
-    category: "Investments",
-    account: "Unlimited Mastercard",
-    id: "456113216651",
-    date: "05 Jan 2026",
-    time: "at 10.35 am",
-    amount: "+$350.00",
-    isPositive: true,
-    status: "Success",
-  },
-  {
-    name: "Freelance Projects",
-    category: "income",
-    account: "Platinum Visa Card",
-    id: "45611321613",
-    date: "10 Jan 2026",
-    time: "at 08.25 pm",
-    amount: "+$1250.00",
-    isPositive: true,
-    status: "Success",
-  },
-  {
-    name: "Amazon Purchase",
-    category: "Expense",
-    account: "Visa Card",
-    id: "681113216865",
-    date: "12 Jan 2026",
-    time: "at 10.25 pm",
-    amount: "-$65.00",
-    isPositive: false,
-    status: "Success",
-  },
-];
+const cardStyle = { backgroundColor: "var(--card-bg)" };
+const innerCardStyle = { backgroundColor: "var(--card-inner)" };
 
 // Months list for chart
 const months = [
@@ -71,7 +25,6 @@ const months = [
 ];
 
 // Graph values matching visual coordinates in image
-// Ticks: 100k (Y=20), 80k (Y=70), 50k (Y=120), 40k (Y=170), 20k (Y=220), 0 (Y=270)
 const incomePoints = [
   { val: 0, y: 270 },
   { val: 40000, y: 170 },
@@ -97,7 +50,7 @@ const expensePoints = [
   { val: 10000, y: 245 },
   { val: 18000, y: 225 },
   { val: 45000, y: 145 },
-  { val: 76000, y: 70 }, // Peak close to Oct
+  { val: 76000, y: 70 }, 
   { val: 25000, y: 205 },
   { val: 8000, y: 250 },
 ];
@@ -112,18 +65,32 @@ const tooltipData = [
   { val: "$700.00", trend: "-1.5%" },
   { val: "$1,300.00", trend: "+1.9%" },
   { val: "$3,200.00", trend: "+4.5%" },
-  { val: "$5,662.00", trend: "+6.5%" }, // Matches OCT peak in image
+  { val: "$5,662.00", trend: "+6.5%" }, 
   { val: "$1,850.00", trend: "-2.3%" },
   { val: "$600.00", trend: "-0.8%" },
 ];
 
 export default function Transactions() {
+  const {
+    balances,
+    transactions,
+    cards,
+    deposit,
+    withdraw,
+  } = useFinance();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [accountFilter, setAccountFilter] = useState("All");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+
+  // Deposit/Withdraw Modals
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [transactionAmount, setTransactionAmount] = useState("");
+  const [selectedCardAccount, setSelectedCardAccount] = useState(cards[0]?.name || "Cash Wallet");
 
   // Active month hover state for graph (default to index 9 = OCT to match static image)
   const [hoveredIndex, setHoveredIndex] = useState(9);
@@ -157,11 +124,16 @@ export default function Transactions() {
   const stepX = chartWidth / 11;
 
   // Filter transaction lists
-  const filteredTransactions = initialTransactions.filter((t) => {
+  const filteredTransactions = transactions.filter((t) => {
     const matchesSearch =
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.account.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.id.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesGlobal = 
+      globalSearch === "" ||
+      t.name.toLowerCase().includes(globalSearch.toLowerCase()) ||
+      t.account.toLowerCase().includes(globalSearch.toLowerCase());
 
     const matchesCategory =
       categoryFilter === "All" ||
@@ -171,11 +143,52 @@ export default function Transactions() {
       accountFilter === "All" ||
       t.account.toLowerCase() === accountFilter.toLowerCase();
 
-    return matchesSearch && matchesCategory && matchesAccount;
+    return matchesSearch && matchesGlobal && matchesCategory && matchesAccount;
   });
 
+  const handleDepositSubmit = (e) => {
+    e.preventDefault();
+    const amt = Number(transactionAmount);
+    if (amt <= 0) {
+      alert("Amount must be positive!");
+      return;
+    }
+    deposit(amt, selectedCardAccount);
+    setTransactionAmount("");
+    setShowDepositModal(false);
+  };
+
+  const handleWithdrawSubmit = (e) => {
+    e.preventDefault();
+    const amt = Number(transactionAmount);
+    if (amt <= 0) {
+      alert("Amount must be positive!");
+      return;
+    }
+    const ok = withdraw(amt, selectedCardAccount);
+    if (ok) {
+      setTransactionAmount("");
+      setShowWithdrawModal(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = "Name,Category,Account,Transaction ID,Date,Time,Amount,Status\n";
+    const rows = filteredTransactions.map((t) => 
+      `"${t.name}","${t.category}","${t.account}","'${t.id}","${t.date}","${t.time}","${t.amount}","${t.status}"`
+    ).join("\n");
+    
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + rows);
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", "Fynix_Transactions.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="p-6 min-h-screen" style={{ backgroundColor: "#1C1C1C", color: "white" }}>
+    <div className="p-6 min-h-screen" style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}>
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
@@ -201,12 +214,16 @@ export default function Transactions() {
               placeholder="Search Here.."
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              className="bg-transparent outline-none w-full text-sm placeholder-gray-500"
+              className="bg-transparent outline-none w-full text-sm placeholder-gray-500 text-white"
             />
           </div>
           {/* Withdraw */}
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-transform hover:scale-105"
+            onClick={() => {
+              setTransactionAmount("");
+              setShowWithdrawModal(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer"
             style={{ backgroundColor: "#FF7A1A" }}
           >
             <div className="w-5 h-5 rounded-full border border-white flex items-center justify-center text-xs">
@@ -216,7 +233,11 @@ export default function Transactions() {
           </button>
           {/* Deposit */}
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-transform hover:scale-105"
+            onClick={() => {
+              setTransactionAmount("");
+              setShowDepositModal(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer"
             style={{ backgroundColor: "#2A2A2A", border: "1px solid #FF7A1A", color: "#FF7A1A" }}
           >
             <FiPlus size={16} /> Deposit
@@ -242,7 +263,7 @@ export default function Transactions() {
               </div>
               <div className="flex items-baseline gap-3">
                 <h2 className="text-4xl font-bold" style={{ color: "#FF7A1A" }}>
-                  $75,662.05
+                  ${balances.balance.toLocaleString()}
                 </h2>
                 <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "#4ADE80" }}>
                   <FiTrendingUp /> +56.85%
@@ -250,72 +271,82 @@ export default function Transactions() {
               </div>
               <div className="flex flex-wrap gap-3 mt-6">
                 <button
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium text-xs text-white transition-opacity hover:opacity-90"
+                  onClick={() => setShowWithdrawModal(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium text-xs text-white transition-opacity hover:opacity-90 active:scale-95 cursor-pointer"
                   style={{ backgroundColor: "#FF7A1A" }}
                 >
-                  <FiArrowUpRight size={14} /> Transfer Founds
+                  <FiArrowUpRight size={14} /> Transfer Funds
                 </button>
                 <button
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium text-xs transition-colors hover:bg-gray-800"
+                  onClick={() => setShowDepositModal(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium text-xs transition-colors hover:bg-gray-800 active:scale-95 cursor-pointer"
                   style={{ border: "1px solid #FF7A1A", color: "#FF7A1A" }}
                 >
-                  <FiPlus size={14} /> Found Request
+                  <FiPlus size={14} /> Fund Request
                 </button>
               </div>
             </div>
 
             {/* Stylized Visa Credit Card */}
-            <div
-              className="rounded-2xl p-5 text-white flex flex-col justify-between relative overflow-hidden shadow-xl"
-              style={{
-                background: "linear-gradient(135deg, #FF9B4D 0%, #FF7A1A 50%, #E05600 100%)",
-                width: "250px",
-                height: "145px",
-                flexShrink: 0,
-              }}
-            >
-              {/* Card Header */}
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-1.5 text-[11px] font-medium opacity-90">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="rotate-90">
-                    <path d="M12 2a10 10 0 0 1 10 10" />
-                    <path d="M12 6a6 6 0 0 1 6 6" />
-                    <path d="M12 10a2 2 0 0 1 2 2" />
-                  </svg>
-                  <span>Credit Card</span>
+            {cards.length > 0 && (
+              <div
+                className="rounded-2xl p-5 text-white flex flex-col justify-between relative overflow-hidden shadow-xl"
+                style={{
+                  background: cards[0].color,
+                  width: "250px",
+                  height: "145px",
+                  flexShrink: 0,
+                }}
+              >
+                {/* Lock Indicator */}
+                {cards[0].isLocked && (
+                  <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10 text-[10px] font-bold text-red-300">
+                    FROZEN
+                  </div>
+                )}
+                {/* Card Header */}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1.5 text-[11px] font-medium opacity-90">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="rotate-90">
+                      <path d="M12 2a10 10 0 0 1 10 10" />
+                      <path d="M12 6a6 6 0 0 1 6 6" />
+                      <path d="M12 10a2 2 0 0 1 2 2" />
+                    </svg>
+                    <span>{cards[0].name}</span>
+                  </div>
+                  <span className="font-extrabold italic text-lg tracking-wider">{cards[0].type}</span>
                 </div>
-                <span className="font-extrabold italic text-lg tracking-wider">VISA</span>
-              </div>
-              {/* Card Number */}
-              <div className="text-sm tracking-widest font-semibold mt-4">
-                1234xxxxxx565
-              </div>
-              {/* Card Footer with Chip */}
-              <div className="flex justify-between items-end mt-2">
-                <div className="text-[10px] opacity-80 font-mono">
-                  VALID THRU 12/28
+                {/* Card Number */}
+                <div className="text-sm tracking-widest font-semibold mt-4">
+                  {cards[0].number.slice(0, 4)} xxxxxx {cards[0].number.slice(-4)}
                 </div>
-                {/* Gold Card Chip */}
-                <div
-                  className="w-8 h-6 rounded-md relative overflow-hidden border border-amber-600/30"
-                  style={{
-                    background: "linear-gradient(135deg, #F5D061 0%, #E6B02E 100%)",
-                  }}
-                >
-                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
-                    <div className="border-r border-b border-black"></div>
-                    <div className="border-r border-b border-black"></div>
-                    <div className="border-b border-black"></div>
-                    <div className="border-r border-b border-black"></div>
-                    <div className="border-r border-b border-black"></div>
-                    <div className="border-b border-black"></div>
-                    <div className="border-r border-black"></div>
-                    <div className="border-r border-black"></div>
-                    <div></div>
+                {/* Card Footer with Chip */}
+                <div className="flex justify-between items-end mt-2">
+                  <div className="text-[10px] opacity-80 font-mono">
+                    VALID THRU {cards[0].expiry}
+                  </div>
+                  {/* Gold Card Chip */}
+                  <div
+                    className="w-8 h-6 rounded-md relative overflow-hidden border border-amber-600/30"
+                    style={{
+                      background: "linear-gradient(135deg, #F5D061 0%, #E6B02E 100%)",
+                    }}
+                  >
+                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
+                      <div className="border-r border-b border-black"></div>
+                      <div className="border-r border-b border-black"></div>
+                      <div className="border-b border-black"></div>
+                      <div className="border-r border-b border-black"></div>
+                      <div className="border-r border-b border-black"></div>
+                      <div className="border-b border-black"></div>
+                      <div className="border-r border-black"></div>
+                      <div className="border-r border-black"></div>
+                      <div></div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Three Sub-stats Horizontal Row */}
@@ -327,7 +358,7 @@ export default function Transactions() {
                 Expenses
               </div>
               <h3 className="text-xl font-bold" style={{ color: "#FF7A1A" }}>
-                $5,662.05
+                ${balances.expenses.toLocaleString()}
               </h3>
               <div className="flex justify-between items-center mt-3 text-[10px] text-gray-500">
                 <span>last month</span>
@@ -344,7 +375,7 @@ export default function Transactions() {
                 Savings
               </div>
               <h3 className="text-xl font-bold" style={{ color: "#FF7A1A" }}>
-                $15,662.05
+                ${balances.savings.toLocaleString()}
               </h3>
               <div className="flex justify-between items-center mt-3 text-[10px] text-gray-500">
                 <span>last month</span>
@@ -361,7 +392,7 @@ export default function Transactions() {
                 Income
               </div>
               <h3 className="text-xl font-bold" style={{ color: "#FF7A1A" }}>
-                $25,662.05
+                ${balances.income.toLocaleString()}
               </h3>
               <div className="flex justify-between items-center mt-3 text-[10px] text-gray-500">
                 <span>last month</span>
@@ -380,12 +411,10 @@ export default function Transactions() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Cash Flow</h3>
               <div className="flex items-center gap-3">
-                {/* Income Indicator */}
                 <div className="flex items-center gap-1.5 border border-gray-700 rounded-full px-2.5 py-1 text-xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-100"></span>
                   <span className="text-gray-300">Income</span>
                 </div>
-                {/* Expenses Indicator */}
                 <div className="flex items-center gap-1.5 border border-orange-500/30 rounded-full px-2.5 py-1 text-xs bg-orange-500/5">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#FF7A1A" }}></span>
                   <span style={{ color: "#FF7A1A" }}>Expenses</span>
@@ -422,7 +451,6 @@ export default function Transactions() {
                 <text x="25" y="275" fill="#888888" className="text-xs" textAnchor="start">0</text>
 
                 {/* Spline Line Paths */}
-                {/* 1. Income Line (Beige/Light-yellow) */}
                 <path
                   d={getBezierPath(incomePoints)}
                   fill="none"
@@ -431,7 +459,6 @@ export default function Transactions() {
                   className="transition-all duration-300"
                 />
 
-                {/* 2. Expenses Line (Orange) */}
                 <path
                   d={getBezierPath(expensePoints)}
                   fill="none"
@@ -440,10 +467,8 @@ export default function Transactions() {
                   className="transition-all duration-300"
                 />
 
-                {/* Dynamic/Static Hover Highlight Dot */}
                 {hoveredIndex !== null && (
                   <>
-                    {/* Vertical Highlight Bar */}
                     <line
                       x1={paddingLeft + hoveredIndex * stepX}
                       y1="20"
@@ -452,7 +477,6 @@ export default function Transactions() {
                       stroke="rgba(255, 122, 26, 0.15)"
                       strokeWidth="2"
                     />
-                    {/* Income Point Dot */}
                     <circle
                       cx={paddingLeft + hoveredIndex * stepX}
                       cy={incomePoints[hoveredIndex].y}
@@ -461,7 +485,6 @@ export default function Transactions() {
                       stroke="#FFE5B4"
                       strokeWidth="3"
                     />
-                    {/* Expenses Point Dot */}
                     <circle
                       cx={paddingLeft + hoveredIndex * stepX}
                       cy={expensePoints[hoveredIndex].y}
@@ -473,7 +496,6 @@ export default function Transactions() {
                   </>
                 )}
 
-                {/* Invisible hover regions for interactive tooltip */}
                 {months.map((m, idx) => {
                   const xPos = paddingLeft + idx * stepX;
                   return (
@@ -490,7 +512,6 @@ export default function Transactions() {
                   );
                 })}
 
-                {/* X-Axis labels */}
                 {months.map((m, idx) => {
                   const xPos = paddingLeft + idx * stepX;
                   return (
@@ -508,7 +529,6 @@ export default function Transactions() {
                 })}
               </svg>
 
-              {/* Spline Chart Custom Hover Tooltip (Positioned above the selected point) */}
               {hoveredIndex !== null && (
                 <div
                   className="absolute pointer-events-none rounded-xl p-2.5 shadow-lg border border-orange-500/20 text-xs flex flex-col justify-center transition-all duration-200"
@@ -547,16 +567,14 @@ export default function Transactions() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3 flex-wrap">
             {/* Search Input bar */}
-            <div
-              className="flex items-center rounded-full px-3 py-2 w-64 border border-gray-700 bg-[#222222]"
-            >
+            <div className="flex items-center rounded-full px-3 py-2 w-64 border border-gray-700 bg-[#222222]">
               <FiSearch className="text-gray-500 mr-2" />
               <input
                 type="text"
                 placeholder="Search Transactions.."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent outline-none w-full text-xs placeholder-gray-500"
+                className="bg-transparent outline-none w-full text-xs placeholder-gray-500 text-white"
               />
             </div>
 
@@ -567,7 +585,7 @@ export default function Transactions() {
                   setShowCategoryDropdown(!showCategoryDropdown);
                   setShowAccountDropdown(false);
                 }}
-                className="flex items-center justify-between gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                className="flex items-center justify-between gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
                 style={{ backgroundColor: "#FF7A1A" }}
               >
                 {categoryFilter === "All" ? "All Category" : categoryFilter}
@@ -585,7 +603,7 @@ export default function Transactions() {
                         setCategoryFilter(cat);
                         setShowCategoryDropdown(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-xs hover:bg-orange-500/20 hover:text-orange-500 text-gray-300 first:rounded-t-xl last:rounded-b-xl"
+                      className="block w-full text-left px-4 py-2 text-xs hover:bg-orange-500/20 hover:text-orange-500 text-gray-300 first:rounded-t-xl last:rounded-b-xl cursor-pointer"
                     >
                       {cat}
                     </button>
@@ -601,7 +619,7 @@ export default function Transactions() {
                   setShowAccountDropdown(!showAccountDropdown);
                   setShowCategoryDropdown(false);
                 }}
-                className="flex items-center justify-between gap-2 px-4 py-2 rounded-full text-xs text-gray-300 border border-gray-700 bg-[#222222] hover:bg-gray-800"
+                className="flex items-center justify-between gap-2 px-4 py-2 rounded-full text-xs text-gray-300 border border-gray-700 bg-[#222222] hover:bg-gray-800 cursor-pointer"
               >
                 {accountFilter === "All" ? "All Account" : accountFilter}
                 <FiChevronDown />
@@ -611,14 +629,14 @@ export default function Transactions() {
                   className="absolute left-0 mt-2 w-48 rounded-xl shadow-lg border border-gray-700 z-10"
                   style={{ backgroundColor: "#2A2A2A" }}
                 >
-                  {["All", "Platinum Visa Card", "Unlimited Mastercard", "Visa Card"].map((acc) => (
+                  {["All", "Platinum Visa Card", "Unlimited Mastercard", "Visa Card", "Cash Wallet"].map((acc) => (
                     <button
                       key={acc}
                       onClick={() => {
                         setAccountFilter(acc);
                         setShowAccountDropdown(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-xs hover:bg-orange-500/20 hover:text-orange-500 text-gray-300 first:rounded-t-xl last:rounded-b-xl"
+                      className="block w-full text-left px-4 py-2 text-xs hover:bg-orange-500/20 hover:text-orange-500 text-gray-300 first:rounded-t-xl last:rounded-b-xl cursor-pointer"
                     >
                       {acc}
                     </button>
@@ -629,23 +647,17 @@ export default function Transactions() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Date range filter display */}
-            <div
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white border border-gray-700 bg-[#222222]"
-            >
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500"
-              >
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white border border-gray-700 bg-[#222222]">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500">
                 <FiCalendar size={11} />
               </div>
               Jan 2026 - Feb 2026
               <FiChevronDown className="text-orange-500" />
             </div>
 
-            {/* Download Button */}
             <button
-              onClick={() => alert("Downloading CSV of transactions...")}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: "#FF7A1A" }}
             >
               Download
@@ -658,10 +670,7 @@ export default function Transactions() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr
-                className="text-gray-400 text-xs font-semibold"
-                style={{ borderBottom: "1px solid #3a3a3a" }}
-              >
+              <tr className="text-gray-400 text-xs font-semibold" style={{ borderBottom: "1px solid #3a3a3a" }}>
                 <th className="py-3.5 px-3 font-normal w-[22%]">Transaction Name</th>
                 <th className="py-3.5 px-3 font-normal w-[20%]">Account</th>
                 <th className="py-3.5 px-3 font-normal w-[15%]">Transaction ID</th>
@@ -673,16 +682,9 @@ export default function Transactions() {
             <tbody>
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((tx, i) => (
-                  <tr
-                    key={i}
-                    className="text-sm border-b border-gray-800/60 hover:bg-white/5 transition-colors"
-                  >
-                    {/* Name & Sub-category */}
+                  <tr key={i} className="text-sm border-b border-gray-800/60 hover:bg-white/5 transition-colors">
                     <td className="py-4 px-3 flex items-center gap-3">
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                        style={{ backgroundColor: "#FF7A1A" }}
-                      >
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "#FF7A1A" }}>
                         <MdAccountBalanceWallet size={16} />
                       </div>
                       <div>
@@ -690,37 +692,17 @@ export default function Transactions() {
                         <div className="text-gray-500 text-xs mt-0.5 capitalize">{tx.category}</div>
                       </div>
                     </td>
-                    {/* Account */}
-                    <td className="py-4 px-3 text-gray-300 align-middle">
-                      {tx.account}
-                    </td>
-                    {/* Transaction ID */}
-                    <td className="py-4 px-3 text-gray-300 font-mono align-middle">
-                      {tx.id}
-                    </td>
-                    {/* Date & Time */}
+                    <td className="py-4 px-3 text-gray-300 align-middle">{tx.account}</td>
+                    <td className="py-4 px-3 text-gray-300 font-mono align-middle">{tx.id}</td>
                     <td className="py-4 px-3 align-middle text-gray-300">
                       <div>{tx.date}</div>
-                      <div className="text-gray-500 text-xs mt-0.5">
-                        {tx.time}
-                      </div>
+                      <div className="text-gray-500 text-xs mt-0.5">{tx.time}</div>
                     </td>
-                    {/* Amount */}
-                    <td
-                      className="py-4 px-3 font-semibold align-middle"
-                      style={{ color: tx.isPositive ? "#FFFFFF" : "#EF4444" }}
-                    >
+                    <td className="py-4 px-3 font-semibold align-middle" style={{ color: tx.isPositive ? "#FFFFFF" : "#EF4444" }}>
                       {tx.amount}
                     </td>
-                    {/* Status Badge */}
                     <td className="py-4 px-3 align-middle">
-                      <span
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold"
-                        style={{
-                          backgroundColor: "#22C55E",
-                          color: "white",
-                        }}
-                      >
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-[#22C55E] text-white">
                         <span className="w-1.5 h-1.5 rounded-full bg-white inline-block"></span>
                         {tx.status}
                       </span>
@@ -738,6 +720,102 @@ export default function Transactions() {
           </table>
         </div>
       </div>
+
+      {/* Deposit Overlay Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-2xl p-6 relative bg-[#2A2A2A]">
+            <button onClick={() => setShowDepositModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+              <FiX size={20} />
+            </button>
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+              <FiPlus className="text-orange-500" /> Deposit Funds
+            </h3>
+            <form onSubmit={handleDepositSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Deposit Amount ($)</label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={transactionAmount}
+                  onChange={(e) => setTransactionAmount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  placeholder="e.g. 500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Select Destination Account</label>
+                <select
+                  value={selectedCardAccount}
+                  onChange={(e) => setSelectedCardAccount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                >
+                  <option value="Cash Wallet">Cash Wallet</option>
+                  {cards.map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-2">
+                <button type="submit" className="w-full py-2.5 rounded-xl font-bold text-xs text-white hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "#FF7A1A" }}>
+                  Confirm Deposit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Overlay Modal */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-2xl p-6 relative bg-[#2A2A2A]">
+            <button onClick={() => setShowWithdrawModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+              <FiX size={20} />
+            </button>
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+              <FaArrowDown className="text-orange-500" /> Withdraw Funds
+            </h3>
+            <form onSubmit={handleWithdrawSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Withdrawal Amount ($)</label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={transactionAmount}
+                  onChange={(e) => setTransactionAmount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  placeholder="e.g. 200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Select Source Account</label>
+                <select
+                  value={selectedCardAccount}
+                  onChange={(e) => setSelectedCardAccount(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                >
+                  <option value="Cash Wallet">Cash Wallet</option>
+                  {cards.map(c => (
+                    <option key={c.id} value={c.name} disabled={c.isLocked}>{c.name} {c.isLocked ? "(Locked)" : ""}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-2">
+                <button type="submit" className="w-full py-2.5 rounded-xl font-bold text-xs text-white hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "#FF7A1A" }}>
+                  Confirm Withdrawal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

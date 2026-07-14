@@ -28,8 +28,8 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     <aside
       className={`${
         collapsed ? "w-20" : "w-64"
-      } transition-all duration-300 flex flex-col relative min-h-screen`}
-      style={{ backgroundColor: "#1C1C1C", borderRight: "1px solid #F4720133" }}
+      } transition-[width] duration-300 flex flex-col relative min-h-screen`}
+      style={{ backgroundColor: "var(--card-bg)", borderRight: "1px solid var(--border-color)" }}
     >
       {/* ✅ Logo Section */}
       <div className="relative flex items-center py-6 px-4">
@@ -104,8 +104,8 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive
-                  ? "text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  ? "text-white font-bold"
+                  : "text-gray-400 hover:bg-[var(--nav-hover)] hover:text-[var(--text-color)]"
               } ${collapsed ? "justify-center" : ""}`
             }
             style={({ isActive }) => ({
@@ -123,7 +123,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       {/* ✅ Divider Line */}
       <div
         className="mx-4 mt-2"
-        style={{ borderTop: "1px solid #F4720133" }}
+        style={{ borderTop: "1px solid var(--border-color)" }}
       />
 
       {/* ✅ Logout Button */}
