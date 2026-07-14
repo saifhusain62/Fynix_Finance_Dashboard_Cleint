@@ -43,25 +43,25 @@ export default function Activity() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3 flex-wrap">
             {/* Search Input bar */}
-            <div className="flex items-center rounded-full px-3 py-2 w-64 border border-gray-700 bg-[#222222]">
-              <FiSearch className="text-gray-500 mr-2" />
+            <div className="flex items-center rounded-full px-3 py-2 w-64 border border-[var(--input-border)] bg-[var(--input-bg)]">
+              <FiSearch className="text-[var(--text-muted)] mr-2" />
               <input
                 type="text"
                 placeholder="Search audit trail..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent outline-none w-full text-xs placeholder-gray-500 text-white"
+                className="bg-transparent outline-none w-full text-xs placeholder-gray-500 text-[var(--text-color)]"
               />
             </div>
 
             {/* Type Filters */}
-            <div className="flex gap-2 bg-[#222222] p-1 rounded-full border border-gray-800">
+            <div className="flex gap-2 bg-[var(--card-inner)] p-1 rounded-full border border-[var(--border-color)]">
               {["All", "Transfer", "System", "Security"].map((type) => (
                 <button
                   key={type}
                   onClick={() => setTypeFilter(type)}
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                    typeFilter === type ? "bg-orange-500 text-white" : "text-gray-400 hover:text-gray-200"
+                    typeFilter === type ? "bg-orange-500 text-white" : "text-[var(--text-muted)] hover:text-[var(--text-color)]"
                   }`}
                 >
                   {type}
@@ -77,22 +77,22 @@ export default function Activity() {
             filteredLogs.map((log) => (
               <div
                 key={log.id}
-                className="flex items-center justify-between p-4 rounded-xl border border-gray-800 bg-[#222222]/50 hover:bg-[#222222] transition-colors"
+                className="flex items-center justify-between p-4 rounded-xl border border-orange-500/25 bg-[var(--card-bg)] hover:border-orange-500 hover:bg-[var(--card-inner)] transition-all duration-200"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-orange-500/10 flex items-center justify-center text-sm">
                     {getLogIcon(log.type)}
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-white">{log.message}</h4>
-                    <span className="text-[9px] text-gray-500 uppercase font-black tracking-wider mt-0.5 inline-block">
+                    <h4 className="text-xs font-semibold text-[var(--text-color)]">{log.message}</h4>
+                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-black tracking-wider mt-0.5 inline-block">
                       {log.type} Event
                     </span>
                   </div>
                 </div>
-                <div className="text-[10px] text-gray-500 font-mono text-right">
+                <span className="text-[10px] text-[var(--text-muted)]">
                   {log.timestamp}
-                </div>
+                </span>
               </div>
             ))
           ) : (

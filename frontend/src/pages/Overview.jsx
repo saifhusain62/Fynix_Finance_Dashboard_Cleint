@@ -103,7 +103,7 @@ export default function Overview() {
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold">Good Morning {user.name}!</h1>
-          <p className="text-gray-400 mt-1 text-sm">
+          <p className="text-[var(--text-muted)] mt-1 text-sm">
             Smart Task Tracking To Keep Your Workflow Moving Smoothly
           </p>
         </div>
@@ -161,12 +161,12 @@ export default function Overview() {
               >
                 <MdAttachMoney style={{ color: "#FF7A1A" }} />
               </div>
-              <span className="text-gray-200 font-medium">Total Revenue</span>
+              <span className="text-[var(--text-color)] font-medium">Total Revenue</span>
             </div>
             <h2 className="text-4xl font-bold" style={{ color: "#FF7A1A" }}>
               ${balances.revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </h2>
-            <div className="flex justify-between items-center mt-8 text-xs text-gray-400">
+            <div className="flex justify-between items-center mt-8 text-xs text-[var(--text-muted)]">
               <span>Compare to last month</span>
               <span className="flex items-center gap-1" style={{ color: "#4ADE80" }}>
                 <FiTrendingUp /> +16.85%
@@ -192,7 +192,7 @@ export default function Overview() {
                 }}
               />
             </div>
-            <p className="text-gray-400 text-xs mt-3">
+            <p className="text-[var(--text-muted)] text-xs mt-3">
               ${balances.limitUsed} Used From ${balances.limitMax} Limit
             </p>
           </div>
@@ -208,7 +208,7 @@ export default function Overview() {
                 View All
               </Link>
             </div>
-            <p className="text-gray-400 text-xs mb-4">
+            <p className="text-[var(--text-muted)] text-xs mb-4">
               View your income in a certain period of time
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -219,7 +219,7 @@ export default function Overview() {
                 { label: "Expenses", value: `$${balances.expenses.toLocaleString()}`, percent: "+16.85%" },
               ].map((item, i) => (
                 <div key={i} className="rounded-xl p-4" style={innerCardStyle}>
-                  <div className="flex items-center gap-2 text-xs text-gray-300">
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                     <MdAccountBalanceWallet style={{ color: "#FF7A1A" }} />
                     {item.label}
                   </div>
@@ -230,7 +230,7 @@ export default function Overview() {
                     {item.value}
                   </h4>
                   <div className="flex justify-between text-xs mt-2">
-                    <span className="text-gray-400">last month</span>
+                    <span className="text-[var(--text-muted)]">last month</span>
                     <span className="flex items-center gap-1" style={{ color: "#4ADE80" }}>
                       <FiTrendingUp /> {item.percent}
                     </span>
@@ -246,7 +246,7 @@ export default function Overview() {
           {/* Quick Transfer */}
           <div className="rounded-2xl p-6" style={cardStyle}>
             <h3 className="font-semibold mb-1">Quick Transfer</h3>
-            <p className="text-gray-400 text-xs mb-3">
+            <p className="text-[var(--text-muted)] text-xs mb-3">
               Instantly move funds to active contacts
             </p>
             {/* Avatar row with active ring based on index */}
@@ -271,9 +271,9 @@ export default function Overview() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[var(--text-muted)]">
               Balance :{" "}
-              <span className="text-white font-semibold">${balances.balance.toLocaleString()}</span>
+              <span className="text-[var(--text-color)] font-semibold">${balances.balance.toLocaleString()}</span>
             </p>
             <div className="flex justify-between items-center mt-3">
               <input
@@ -371,7 +371,7 @@ export default function Overview() {
             <div className="flex flex-wrap justify-between items-center mb-5 gap-3">
               <div>
                 <h3 className="font-semibold text-lg">Recent Activity</h3>
-                <p className="text-gray-400 text-xs">
+                <p className="text-[var(--text-muted)] text-xs">
                   View recent account actions and transaction history
                 </p>
               </div>
@@ -390,8 +390,8 @@ export default function Overview() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr
-                    className="text-gray-400 text-xs"
-                    style={{ borderBottom: "1px solid #3a3a3a" }}
+                    className="text-[var(--text-muted)] text-xs"
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
                   >
                     <th className="py-3 px-2 font-normal w-[20%]">Name</th>
                     <th className="py-3 px-2 font-normal w-[25%]">Date & Time</th>
@@ -405,12 +405,12 @@ export default function Overview() {
                     <tr
                       key={i}
                       className="text-sm"
-                      style={{ borderBottom: "1px solid #333" }}
+                      style={{ borderBottom: "1px solid var(--border-color)" }}
                     >
                       <td className="py-4 px-2 align-middle">{r.name}</td>
                       <td className="py-4 px-2 align-middle">
                         <div>{r.date}</div>
-                        <div className="text-gray-500 text-xs mt-1">
+                        <div className="text-[var(--text-muted)] text-xs mt-1">
                           {r.time}
                         </div>
                       </td>
@@ -418,7 +418,7 @@ export default function Overview() {
                       <td className="py-4 px-2 align-middle">$0.00</td>
                       <td
                         className="py-4 px-2 align-middle font-semibold"
-                        style={{ color: r.isPositive ? "#FFFFFF" : "#EF4444" }}
+                        style={{ color: r.isPositive ? "var(--text-color)" : "#EF4444" }}
                       >
                         {r.amount}
                       </td>
@@ -426,7 +426,7 @@ export default function Overview() {
                   ))}
                   {filteredTransactions.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-gray-500">
+                      <td colSpan={5} className="py-8 text-center text-[var(--text-muted)]">
                         No transactions found.
                       </td>
                     </tr>

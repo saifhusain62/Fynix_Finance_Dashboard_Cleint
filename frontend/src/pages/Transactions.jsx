@@ -259,7 +259,7 @@ export default function Transactions() {
                 >
                   <MdAccountBalanceWallet size={20} style={{ color: "#FF7A1A" }} />
                 </div>
-                <span className="text-gray-300 font-medium text-sm">Total Balance</span>
+                <span className="text-[var(--text-muted)] font-medium text-sm">Total Balance</span>
               </div>
               <div className="flex items-baseline gap-3">
                 <h2 className="text-4xl font-bold" style={{ color: "#FF7A1A" }}>
@@ -353,14 +353,14 @@ export default function Transactions() {
           <div className="grid grid-cols-3 gap-4">
             {/* Expenses */}
             <div className="rounded-2xl p-4" style={cardStyle}>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-2">
                 <FiCreditCard size={14} className="text-orange-500" />
                 Expenses
               </div>
               <h3 className="text-xl font-bold" style={{ color: "#FF7A1A" }}>
                 ${balances.expenses.toLocaleString()}
               </h3>
-              <div className="flex justify-between items-center mt-3 text-[10px] text-gray-500">
+              <div className="flex justify-between items-center mt-3 text-[10px] text-[var(--text-muted)]">
                 <span>last month</span>
                 <span className="flex items-center gap-0.5 text-green-400 font-medium">
                   <FiTrendingUp size={10} /> +16.85%
@@ -370,14 +370,14 @@ export default function Transactions() {
 
             {/* Savings */}
             <div className="rounded-2xl p-4" style={cardStyle}>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-2">
                 <FiArrowDownLeft size={14} className="text-orange-500" />
                 Savings
               </div>
               <h3 className="text-xl font-bold" style={{ color: "#FF7A1A" }}>
                 ${balances.savings.toLocaleString()}
               </h3>
-              <div className="flex justify-between items-center mt-3 text-[10px] text-gray-500">
+              <div className="flex justify-between items-center mt-3 text-[10px] text-[var(--text-muted)]">
                 <span>last month</span>
                 <span className="flex items-center gap-0.5 text-green-400 font-medium">
                   <FiTrendingUp size={10} /> +16.85%
@@ -670,7 +670,7 @@ export default function Transactions() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-gray-400 text-xs font-semibold" style={{ borderBottom: "1px solid #3a3a3a" }}>
+              <tr className="text-[var(--text-muted)] text-xs font-semibold" style={{ borderBottom: "1px solid var(--border-color)" }}>
                 <th className="py-3.5 px-3 font-normal w-[22%]">Transaction Name</th>
                 <th className="py-3.5 px-3 font-normal w-[20%]">Account</th>
                 <th className="py-3.5 px-3 font-normal w-[15%]">Transaction ID</th>
@@ -682,23 +682,23 @@ export default function Transactions() {
             <tbody>
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((tx, i) => (
-                  <tr key={i} className="text-sm border-b border-gray-800/60 hover:bg-white/5 transition-colors">
+                  <tr key={i} className="text-sm border-b border-[var(--border-color)] hover:bg-white/5 transition-colors">
                     <td className="py-4 px-3 flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "#FF7A1A" }}>
                         <MdAccountBalanceWallet size={16} />
                       </div>
                       <div>
-                        <div className="font-semibold text-white">{tx.name}</div>
-                        <div className="text-gray-500 text-xs mt-0.5 capitalize">{tx.category}</div>
+                        <div className="font-semibold text-[var(--text-color)]">{tx.name}</div>
+                        <div className="text-[var(--text-muted)] text-xs mt-0.5 capitalize">{tx.category}</div>
                       </div>
                     </td>
-                    <td className="py-4 px-3 text-gray-300 align-middle">{tx.account}</td>
-                    <td className="py-4 px-3 text-gray-300 font-mono align-middle">{tx.id}</td>
-                    <td className="py-4 px-3 align-middle text-gray-300">
+                    <td className="py-4 px-3 text-[var(--text-color)] align-middle">{tx.account}</td>
+                    <td className="py-4 px-3 text-[var(--text-color)] font-mono align-middle">{tx.id}</td>
+                    <td className="py-4 px-3 align-middle text-[var(--text-color)]">
                       <div>{tx.date}</div>
-                      <div className="text-gray-500 text-xs mt-0.5">{tx.time}</div>
+                      <div className="text-[var(--text-muted)] text-xs mt-0.5">{tx.time}</div>
                     </td>
-                    <td className="py-4 px-3 font-semibold align-middle" style={{ color: tx.isPositive ? "#FFFFFF" : "#EF4444" }}>
+                    <td className="py-4 px-3 font-semibold align-middle" style={{ color: tx.isPositive ? "var(--text-color)" : "#EF4444" }}>
                       {tx.amount}
                     </td>
                     <td className="py-4 px-3 align-middle">
@@ -711,7 +711,7 @@ export default function Transactions() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500 text-sm">
+                  <td colSpan={6} className="py-8 text-center text-[var(--text-muted)] text-sm">
                     No transactions found matching the filter criteria.
                   </td>
                 </tr>
@@ -721,36 +721,35 @@ export default function Transactions() {
         </div>
       </div>
 
-      {/* Deposit Overlay Modal */}
       {showDepositModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl p-6 relative bg-[#2A2A2A]">
-            <button onClick={() => setShowDepositModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+          <div className="w-full max-w-sm rounded-2xl p-6 relative" style={cardStyle}>
+            <button onClick={() => setShowDepositModal(false)} className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors">
               <FiX size={20} />
             </button>
-            <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-2 text-[var(--text-color)]">
               <FiPlus className="text-orange-500" /> Deposit Funds
             </h3>
             <form onSubmit={handleDepositSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Deposit Amount ($)</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium font-sans">Deposit Amount ($)</label>
                 <input
                   type="number"
                   min="1"
                   required
                   value={transactionAmount}
                   onChange={(e) => setTransactionAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                   placeholder="e.g. 500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Select Destination Account</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium font-sans">Select Destination Account</label>
                 <select
                   value={selectedCardAccount}
                   onChange={(e) => setSelectedCardAccount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                 >
                   <option value="Cash Wallet">Cash Wallet</option>
                   {cards.map(c => (
@@ -769,36 +768,35 @@ export default function Transactions() {
         </div>
       )}
 
-      {/* Withdraw Overlay Modal */}
       {showWithdrawModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl p-6 relative bg-[#2A2A2A]">
-            <button onClick={() => setShowWithdrawModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+          <div className="w-full max-w-sm rounded-2xl p-6 relative" style={cardStyle}>
+            <button onClick={() => setShowWithdrawModal(false)} className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors">
               <FiX size={20} />
             </button>
-            <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+            <h3 className="font-bold text-xl mb-4 flex items-center gap-2 text-[var(--text-color)]">
               <FaArrowDown className="text-orange-500" /> Withdraw Funds
             </h3>
             <form onSubmit={handleWithdrawSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Withdrawal Amount ($)</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium font-sans">Withdrawal Amount ($)</label>
                 <input
                   type="number"
                   min="1"
                   required
                   value={transactionAmount}
                   onChange={(e) => setTransactionAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                   placeholder="e.g. 200"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium font-sans">Select Source Account</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium font-sans">Select Source Account</label>
                 <select
                   value={selectedCardAccount}
                   onChange={(e) => setSelectedCardAccount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                 >
                   <option value="Cash Wallet">Cash Wallet</option>
                   {cards.map(c => (

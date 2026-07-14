@@ -75,7 +75,7 @@ export default function Card() {
                   key={card.id}
                   onClick={() => setSelectedCardId(card.id)}
                   className={`rounded-2xl p-5 text-white flex flex-col justify-between relative overflow-hidden shadow-lg cursor-pointer hover:-translate-y-1 transition-all ${
-                    selectedCardId === card.id ? "ring-2 ring-orange-500 ring-offset-2 ring-offset-[#2A2A2A]" : "opacity-75 hover:opacity-100"
+                    selectedCardId === card.id ? "ring-2 ring-orange-500 ring-offset-2 ring-offset-[var(--card-bg)]" : "opacity-75 hover:opacity-100"
                   }`}
                   style={{
                     background: card.color,
@@ -122,13 +122,13 @@ export default function Card() {
           {selectedCard && (
             <div className="rounded-2xl p-6" style={cardStyle}>
               <h3 className="font-semibold text-lg mb-1">{selectedCard.name} Settings</h3>
-              <p className="text-gray-400 text-xs mb-6">Manage status & transactional properties.</p>
+              <p className="text-[var(--text-muted)] text-xs mb-6">Manage status & transactional properties.</p>
 
               {/* Status Row */}
               <div className="flex items-center justify-between p-4 rounded-xl mb-4" style={innerCardStyle}>
                 <div>
                   <h4 className="text-sm font-semibold">Card Security Lock</h4>
-                  <p className="text-gray-400 text-[10px] mt-0.5">Freeze transactions instantly.</p>
+                  <p className="text-[var(--text-muted)] text-[10px] mt-0.5">Freeze transactions instantly.</p>
                 </div>
                 <button
                   onClick={() => toggleCardLock(selectedCard.id)}
@@ -155,7 +155,7 @@ export default function Card() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h4 className="text-sm font-semibold">Spending Limit</h4>
-                    <p className="text-gray-400 text-[10px] mt-0.5">Maximum monthly card limit.</p>
+                    <p className="text-[var(--text-muted)] text-[10px] mt-0.5">Maximum monthly card limit.</p>
                   </div>
                   <span className="text-sm font-bold text-orange-500">${selectedCard.limit.toLocaleString()}</span>
                 </div>
@@ -175,22 +175,22 @@ export default function Card() {
                 </div>
               </div>
 
-              {/* Card info rows */}
-              <div className="mt-6 space-y-3.5 border-t border-gray-800/80 pt-6">
+               {/* Card info rows */}
+              <div className="mt-6 space-y-3.5 border-t border-[var(--border-color)] pt-6">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Card Provider</span>
-                  <span className="font-semibold text-white">{selectedCard.type}</span>
+                  <span className="text-[var(--text-muted)]">Card Provider</span>
+                  <span className="font-semibold text-[var(--text-color)]">{selectedCard.type}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Expiry Date</span>
-                  <span className="font-semibold text-white">{selectedCard.expiry}</span>
+                  <span className="text-[var(--text-muted)]">Expiry Date</span>
+                  <span className="font-semibold text-[var(--text-color)]">{selectedCard.expiry}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Current Balance</span>
-                  <span className="font-semibold text-white">${selectedCard.balance.toLocaleString()}</span>
+                  <span className="text-[var(--text-muted)]">Current Balance</span>
+                  <span className="font-semibold text-[var(--text-color)]">${selectedCard.balance.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Lock Status</span>
+                  <span className="text-[var(--text-muted)]">Lock Status</span>
                   <span className={`font-semibold ${selectedCard.isLocked ? "text-red-400" : "text-emerald-400"}`}>
                     {selectedCard.isLocked ? "Frozen" : "Active"}
                   </span>

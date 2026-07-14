@@ -81,30 +81,30 @@ export default function Navbar() {
       {/* Notifications Dropdown Panel */}
       {showNotifDropdown && (
         <div
-          className="absolute right-16 top-16 w-80 rounded-2xl p-4 shadow-xl border border-gray-800 z-50 flex flex-col gap-3"
+          className="absolute right-16 top-16 w-80 rounded-2xl p-4 shadow-xl border border-[var(--border-color)] z-50 flex flex-col gap-3"
           style={{ backgroundColor: "var(--card-bg)" }}
         >
-          <div className="flex justify-between items-center border-b border-gray-800 pb-2">
-            <h4 className="font-bold text-xs text-white">Notifications</h4>
+          <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-2">
+            <h4 className="font-bold text-xs text-[var(--text-color)]">Notifications</h4>
             <button
               onClick={() => setShowNotifDropdown(false)}
-              className="text-gray-400 hover:text-white"
+              className="text-[var(--text-muted)] hover:text-[var(--text-color)]"
             >
               <FiX size={14} />
             </button>
           </div>
           <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
             {activities.slice(0, 4).map((log) => (
-              <div key={log.id} className="text-left text-xs border-b border-gray-800/40 pb-2 last:border-0 last:pb-0">
-                <p className="text-gray-200 font-semibold">{log.message}</p>
-                <div className="flex justify-between items-center mt-1 text-[9px] text-gray-500">
+              <div key={log.id} className="text-left text-xs border-b border-[var(--border-color)] pb-2 last:border-0 last:pb-0">
+                <p className="text-[var(--text-color)] font-semibold">{log.message}</p>
+                <div className="flex justify-between items-center mt-1 text-[9px] text-[var(--text-muted)]">
                   <span>{log.type}</span>
                   <span>{log.timestamp}</span>
                 </div>
               </div>
             ))}
             {activities.length === 0 && (
-              <p className="text-xs text-gray-500 text-center py-4">No new notifications.</p>
+              <p className="text-xs text-[var(--text-muted)] text-center py-4">No new notifications.</p>
             )}
           </div>
         </div>

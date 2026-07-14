@@ -252,7 +252,7 @@ export default function Investment() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-sm rounded-2xl p-6 relative" style={cardStyle}>
             <button
-              onClick={() => setShowAddModal(false) || setShowTradeModal(false)}
+              onClick={() => setShowTradeModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
             >
               <FiX size={20} />

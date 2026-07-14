@@ -184,7 +184,7 @@ export default function Savings() {
           <div className="w-full max-w-sm rounded-2xl p-6 relative" style={cardStyle}>
             <button
               onClick={() => setShowAddModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors"
             >
               <FiX size={20} />
             </button>
@@ -193,26 +193,26 @@ export default function Savings() {
             </h3>
             <form onSubmit={handleAddGoalSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium">Goal Name</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium">Goal Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Dream House"
                   value={newGoalName}
                   onChange={(e) => setNewGoalName(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium">Target Amount ($)</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium">Target Amount ($)</label>
                 <input
                   type="number"
                   value={newGoalTarget}
                   onChange={(e) => setNewGoalTarget(e.target.value)}
                   min="100"
                   required
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                 />
               </div>
 
@@ -253,14 +253,14 @@ export default function Savings() {
           <div className="w-full max-w-sm rounded-2xl p-6 relative" style={cardStyle}>
             <button
               onClick={() => setShowManageModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors"
             >
               <FiX size={20} />
             </button>
             <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
               Manage "{activeGoal.name}"
             </h3>
-            <p className="text-gray-400 text-xs mb-4">Allocate or retrieve savings goal funds.</p>
+            <p className="text-[var(--text-muted)] text-xs mb-4">Allocate or retrieve savings goal funds.</p>
 
             {/* Select Action Tab */}
             <div className="grid grid-cols-2 rounded-xl p-1 mb-4" style={{ backgroundColor: "#222222" }}>
@@ -286,25 +286,25 @@ export default function Savings() {
 
             <form onSubmit={handleManageFundsSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1 font-medium">Transaction Amount ($)</label>
+                <label className="block text-xs text-[var(--text-muted)] mb-1 font-medium">Transaction Amount ($)</label>
                 <input
                   type="number"
                   value={fundAmount}
                   onChange={(e) => setFundAmount(e.target.value)}
                   min="1"
                   required
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-gray-900 border border-gray-700 outline-none text-white focus:border-orange-500/50"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-[var(--input-bg)] border border-[var(--input-border)] outline-none text-[var(--text-color)] focus:border-orange-500/50"
                 />
               </div>
 
               {/* Info panel */}
               <div className="p-3.5 rounded-xl text-xs space-y-2 font-sans" style={innerCardStyle}>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Current Saved Target</span>
-                  <span className="font-semibold text-white">${activeGoal.saved.toLocaleString()} / ${activeGoal.target.toLocaleString()}</span>
+                  <span className="text-[var(--text-muted)]">Current Saved Target</span>
+                  <span className="font-semibold text-[var(--text-color)]">${activeGoal.saved.toLocaleString()} / ${activeGoal.target.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Source Cash Balance</span>
+                  <span className="text-[var(--text-muted)]">Source Cash Balance</span>
                   <span className="font-bold text-orange-500">${balances.balance.toLocaleString()}</span>
                 </div>
               </div>
